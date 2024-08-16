@@ -1,6 +1,7 @@
 package application;
 
 import javafx.scene.Scene;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -29,9 +30,15 @@ public class GameController {
 
         VBox vbox = new VBox(10);
         vbox.getChildren().addAll(welcomeLabel, enhanceButton, viewCollectionButton, shopButton);
+        vbox.setAlignment(Pos.CENTER); // 중앙 정렬 추가
 
-        Scene gameScene = new Scene(vbox, 400, 300);
+        Scene gameScene = new Scene(vbox, 1000, 800);
         primaryStage.setScene(gameScene);
+        
+        // 화면 중앙에 위치시키기
+        primaryStage.centerOnScreen(); // Stage를 화면의 중앙에 배치
+
+        primaryStage.show(); // 화면을 보이게 함
     }
 
     private void enhanceStone() {

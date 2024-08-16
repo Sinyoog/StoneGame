@@ -18,3 +18,15 @@
 .root {
     -fx-background-color: #f0f0f0; /* 배경 색상 */
 }
+
+/* 텍스트 필드 스타일 */
+.text-field {
+    -fx-pref-width: 250px; /* 기본 너비 */
+    -fx-max-width: 250px;  /* 최대 너비 */
+}
+
+/* 비밀번호 필드 스타일 */
+.password-field {
+    -fx-pref-width: 250px; /* 기본 너비 */
+    -fx-max-width: 250px;  /* 최대 너비 */
+}

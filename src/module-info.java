@@ -1,7 +1,6 @@
 module Project {
     requires javafx.controls;
-    requires java.sql; // 이 줄을 추가합니다
-    
+    requires java.sql;
+
     opens application to javafx.graphics, javafx.fxml;
 }
-
