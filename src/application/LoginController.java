@@ -26,7 +26,7 @@ public class LoginController {
 
  // LoginController.java
     public void showLoginScreen() {
-        primaryStage.setTitle("Stone Enhancement Game");
+        primaryStage.setTitle("돌 강화 게임");
 
         // ID와 비밀번호 입력 필드
         TextField idField = new TextField();
@@ -58,9 +58,11 @@ public class LoginController {
 
         // 회원가입 버튼
         Button registerButton = new Button("회원가입");
-        registerButton.setOnAction(e -> {
-            showRegisterScreen();
-        });
+        registerButton.setOnAction(e -> showRegisterScreen());
+
+        // 엔터 키로 로그인 버튼 클릭 이벤트 발생
+        idField.setOnAction(e -> loginButton.fire());
+        passwordField.setOnAction(e -> loginButton.fire());
 
         VBox vbox = new VBox(10);
         vbox.setAlignment(Pos.CENTER);
@@ -126,7 +128,7 @@ public class LoginController {
     }
 
     private void showGameScreen(String playerId) {
-        GameController gameController = new GameController(primaryStage, playerId);
+        GameController gameController = new GameController(primaryStage, playerId, 0, null);
         gameController.showGameScreen();
     }
 
