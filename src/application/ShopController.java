@@ -1,4 +1,4 @@
-package application;
+package Application;
 
 import javafx.scene.Scene;
 import javafx.geometry.Pos;
@@ -9,7 +9,6 @@ import javafx.stage.Stage;
 import javafx.scene.text.Font;
 import javafx.geometry.Insets;
 import javafx.scene.input.KeyCode;
-import javafx.application.Platform;
 
 
 public class ShopController {

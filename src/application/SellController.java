@@ -1,60 +1,40 @@
-package application;
+package Application;
 
-import javafx.scene.Scene;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.scene.input.KeyCode;
-
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SellController {
-    private Stage primaryStage;
-    private String[] inventory;
-    private int playerFunds;
+    private Map<String, Integer> stonePriceMap;
 
-    public SellController(Stage primaryStage, String[] inventory, int playerFunds) {
-        this.primaryStage = primaryStage;
-        this.inventory = inventory;
-        this.playerFunds = playerFunds;
+    public SellController() {
+        stonePriceMap = new HashMap<>();
+        loadStonePrices(); // 하드코딩된 가격 데이터 로드
     }
 
-    public void processSell() {
-        if (inventory.length > 0) {
-            String itemToSell = inventory[0];
-            int sellingPrice = calculateSellingPrice(itemToSell);
-            playerFunds += sellingPrice;
-            inventory = removeItemFromInventory(inventory, itemToSell);
-        } else {
-            showError("판매할 아이템이 없습니다.");
-        }
+    private void loadStonePrices() {
+        // 가격을 하드코딩하여 직접 설정
+        stonePriceMap.put("돌", 0);
+        stonePriceMap.put("석영", 1000);
+        stonePriceMap.put("자수정", 2500);
+        stonePriceMap.put("시트린", 5000);
+        stonePriceMap.put("페리도트", 10000);
+        stonePriceMap.put("토파즈", 20000);
+        stonePriceMap.put("탄자나이트", 40000);
+        stonePriceMap.put("오팔", 80000);
+        stonePriceMap.put("사파이어", 160000);
+        stonePriceMap.put("에메랄드", 300000);
+        stonePriceMap.put("루비", 600000);
+        stonePriceMap.put("알렉산드라이트", 8000000);
+        stonePriceMap.put("다이아몬드", 15000000);
+        stonePriceMap.put("세렌디바이트", 30000000);
+        stonePriceMap.put("타파이트", 50000000);
+        stonePriceMap.put("우라늄", 100000000);
+        stonePriceMap.put("완벽한돌", 1000000000);
     }
 
-    public int getPlayerFunds() {
-        return playerFunds;
-    }
-
-    public String[] getInventory() {
-        return inventory;
-    }
-
-    private int calculateSellingPrice(String item) {
-        return 100; // 판매 가격 로직 (예시)
-    }
-
-    private String[] removeItemFromInventory(String[] inventory, String item) {
-        return Arrays.stream(inventory)
-                .filter(i -> !i.equals(item))
-                .toArray(String[]::new);
-    }
-
-    private void showError(String message) {
-        Stage errorStage = new Stage();
-        VBox vbox = new VBox(new Label(message));
-        Scene scene = new Scene(vbox, 200, 100);
-        errorStage.setScene(scene);
-        errorStage.show();
+    public int calculateSellingPrice(String item) {
+        int price = stonePriceMap.getOrDefault(item, 0);
+        System.out.println("Selling price for " + item + ": " + price);
+        return price;
     }
 }

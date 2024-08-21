@@ -1,4 +1,4 @@
-package application;
+package Application;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -128,7 +128,8 @@ public class LoginController {
     }
 
     private void showGameScreen(String playerId) {
-        GameController gameController = new GameController(primaryStage, playerId, 0, null);
+        String[] emptyInventory = new String[0]; // 빈 배열 생성
+        GameController gameController = new GameController(primaryStage, playerId, 0, emptyInventory);
         gameController.showGameScreen();
     }
 

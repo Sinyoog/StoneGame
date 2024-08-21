@@ -1,49 +1,132 @@
-package application;
+package Application;
 
-import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.text.Font;
-import java.util.Arrays;
+
+import java.io.InputStream;
+import java.util.Map;
+import java.util.HashMap;
 
 public class GameController {
     private Stage primaryStage;
     private String playerId;
-    private int playerFunds; // 현재 자금
-    private String[] inventory; // 소지 아이템
+    private int playerFunds;
+    private String[] inventory;
+    private ImageView imageView;
+    private SellController sellController;
+    private String currentItem; // 현재 표시된 아이템 이름을 저장하는 필드
 
-    // 생성자 수정: Stage, String, int, String[]를 매개변수로 받도록 수정
+    // 아이템 ID 정의
+    private static final Map<String, Integer> ITEM_ID_MAP = new HashMap<>() {{
+        put("돌", 1);
+        put("석영", 2);
+        put("자수정", 3);
+        put("시트린", 4);
+        put("페리도트", 5);
+        put("토파즈", 6);
+        put("탄자나이트", 7);
+        put("오팔", 8);
+        put("사파이어", 9);
+        put("에메랄드", 10);
+        put("루비", 11);
+        put("알렉산드라이트", 12);
+        put("다이아몬드", 13);
+        put("세렌디바이트", 14);
+        put("타파이트", 15);
+        put("우라늄", 16);
+        put("완벽한돌", 17);
+    }};
+
+    // 강화 확률 정의
+    private static final Map<String, Double> ENHANCE_PROBABILITY_MAP = new HashMap<>() {{
+        put("돌", 0.0);
+        put("석영", 80.0);
+        put("자수정", 95.0);
+        put("시트린", 90.0);
+        put("페리도트", 85.0);
+        put("토파즈", 80.0);
+        put("탄자나이트", 75.0);
+        put("오팔", 70.0);
+        put("사파이어", 60.0);
+        put("에메랄드", 50.0);
+        put("루비", 40.0);
+        put("알렉산드라이트", 30.0);
+        put("다이아몬드", 20.0);
+        put("세렌디바이트", 10.0);
+        put("타파이트", 5.0);
+        put("우라늄", 1.0);
+        put("완벽한돌", 0.05);
+    }};
+
     public GameController(Stage primaryStage, String playerId, int initialFunds, String[] initialInventory) {
         this.primaryStage = primaryStage;
         this.playerId = playerId;
         this.playerFunds = initialFunds;
-        this.inventory = initialInventory != null ? initialInventory : new String[0]; // 초기화 방지
+        this.inventory = initialInventory != null ? initialInventory : new String[0];
+        this.imageView = new ImageView();
+        imageView.setFitWidth(400);
+        imageView.setFitHeight(400);
+        imageView.setPreserveRatio(true);
+        this.sellController = new SellController();
+        this.currentItem = "돌";
+    }
+
+    public Integer getItemId(String itemName) {
+        return ITEM_ID_MAP.get(itemName); // ITEM_ID_MAP1 대신 ITEM_ID_MAP 사용
+    }
+
+    public String getItemNameById(int id) {
+        for (Map.Entry<String, Integer> entry : ITEM_ID_MAP.entrySet()) {
+            if (entry.getValue() == id) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public Double getEnhanceProbability(String itemName) {
+        Double probability = ENHANCE_PROBABILITY_MAP.get(itemName);
+        if (probability == null) {
+            System.out.println("No enhance probability found for: " + itemName);
+            return 0.0;
+        }
+        System.out.println("Retrieved enhance probability for " + itemName + ": " + probability);
+        return probability;
+    }
+
+    public Integer getItemPrice(String itemName) {
+        return sellController.calculateSellingPrice(itemName); // SellController에서 가격 계산
+    }
+
+    private void setupEnhanceButton(Button enhanceButton) {
+        enhanceButton.setOnAction(e -> enhanceItem(currentItem)); // 현재 아이템으로 강화하기
     }
 
     public void showGameScreen() {
-        // 사용자와 자금 라벨
         Label welcomeLabel = new Label("사용자: " + playerId);
-        welcomeLabel.setFont(new Font(24)); // 글자 크기 조정
-        Label fundsLabel = new Label("현재 자금: " + playerFunds); // 현재 자금 표시
-        fundsLabel.setFont(new Font(24)); // 글자 크기 조정
+        welcomeLabel.setFont(new Font(24));
+        Label fundsLabel = new Label("현재 자금: " + playerFunds);
+        fundsLabel.setFont(new Font(24));
 
-        // VBox에 라벨들을 추가하고, 이를 BorderPane의 상단에 배치
-        VBox topLeftBox = new VBox(10); // 라벨 간의 간격 10px
+        VBox topLeftBox = new VBox(10);
         topLeftBox.getChildren().addAll(welcomeLabel, fundsLabel);
-        topLeftBox.setAlignment(Pos.TOP_LEFT); // 좌측 상단 정렬
-        topLeftBox.setPadding(new Insets(10)); // 패딩 추가
+        topLeftBox.setAlignment(Pos.TOP_LEFT);
+        topLeftBox.setPadding(new Insets(10));
 
-        // 버튼들
         Button enhanceButton = new Button("강화하기");
-        enhanceButton.setOnAction(e -> openEnhanceScreen());
+        setupEnhanceButton(enhanceButton);
 
         Button viewCollectionButton = new Button("도감 보기");
         viewCollectionButton.setOnAction(e -> openCollectionScreen());
@@ -55,72 +138,69 @@ public class GameController {
         shopButton.setOnAction(e -> openShopScreen());
 
         Button sellButton = new Button("판매하기");
-        sellButton.setOnAction(e -> sellItem()); // 판매 버튼 클릭 시 호출
+        sellButton.setOnAction(e -> {
+            sellItem(); // 판매하기 기능 호출
+            updateImage("돌"); // 판매 후 기본 이미지를 표시
+        });
 
-        // 중앙 버튼을 포함할 VBox
         VBox centerVBox = new VBox(10);
-        centerVBox.getChildren().add(enhanceButton);
+        centerVBox.getChildren().addAll(imageView, enhanceButton);
         centerVBox.setAlignment(Pos.CENTER);
 
-        // 우측 상단 버튼을 포함할 VBox
         VBox rightTopVBox = new VBox(10);
         rightTopVBox.getChildren().add(viewCollectionButton);
         rightTopVBox.setAlignment(Pos.TOP_RIGHT);
-        rightTopVBox.setPadding(new Insets(10)); // 패딩 추가
+        rightTopVBox.setPadding(new Insets(10));
 
-        // 우측 하단 버튼을 포함할 VBox
         VBox rightBottomVBox = new VBox(10);
         rightBottomVBox.getChildren().add(sellButton);
         rightBottomVBox.setAlignment(Pos.BOTTOM_RIGHT);
-        rightBottomVBox.setPadding(new Insets(10)); // 패딩 추가
+        rightBottomVBox.setPadding(new Insets(10));
 
-        // 좌측 하단 버튼을 포함할 VBox
         VBox leftBottomVBox = new VBox(10);
         leftBottomVBox.getChildren().add(shopButton);
         leftBottomVBox.setAlignment(Pos.BOTTOM_LEFT);
-        leftBottomVBox.setPadding(new Insets(10)); // 패딩 추가
+        leftBottomVBox.setPadding(new Insets(10));
 
-        // 도감 보기 버튼 아래에 인벤토리 버튼을 포함할 VBox
         VBox rightMiddleVBox = new VBox(10);
         rightMiddleVBox.getChildren().addAll(viewCollectionButton, inventoryButton);
         rightMiddleVBox.setAlignment(Pos.CENTER_RIGHT);
-        rightMiddleVBox.setPadding(new Insets(10)); // 패딩 추가
+        rightMiddleVBox.setPadding(new Insets(10));
 
-        // BorderPane을 사용하여 레이아웃 설정
         BorderPane borderPane = new BorderPane();
-        borderPane.setTop(topLeftBox); // 상단에 사용자와 자금 라벨 배치
-        borderPane.setCenter(centerVBox); // 중앙에 강화하기 버튼 배치
+        borderPane.setTop(topLeftBox);
+        borderPane.setCenter(centerVBox);
 
-        // 하단에 좌측과 우측 버튼 패널 배치
         BorderPane bottomPane = new BorderPane();
-        bottomPane.setLeft(leftBottomVBox); // 좌측 하단 버튼
-        bottomPane.setRight(rightBottomVBox); // 우측 하단 버튼
+        bottomPane.setLeft(leftBottomVBox);
+        bottomPane.setRight(rightBottomVBox);
 
-        // 우측 상단과 중앙 버튼 패널 배치
         BorderPane rightPane = new BorderPane();
-        rightPane.setTop(rightTopVBox); // 우측 상단 버튼
-        rightPane.setCenter(rightMiddleVBox); // 도감 보기와 인벤토리 버튼
+        rightPane.setTop(rightTopVBox);
+        rightPane.setCenter(rightMiddleVBox);
 
-        // BorderPane에 우측 패널 배치
         borderPane.setRight(rightPane);
-
-        // 하단 버튼 패널을 하단에 배치
         borderPane.setBottom(bottomPane);
+
+        // 초기 이미지를 표시
+        updateImage(currentItem);
 
         Scene gameScene = new Scene(borderPane, 1000, 800);
         primaryStage.setScene(gameScene);
         primaryStage.centerOnScreen();
         primaryStage.show();
+
+        // E 키를 눌렀을 때 강화하기 버튼 기능 수행
+        gameScene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.E) {
+                enhanceItem(currentItem); // 현재 아이템으로 강화하기
+            }
+        });
     }
 
     private void openInventoryScreen() {
         InventoryController inventoryController = new InventoryController(primaryStage, inventory, this);
         inventoryController.showInventoryScreen();
-    }
-    
-    private void openEnhanceScreen() {
-        EnhanceStoneController enhanceController = new EnhanceStoneController(primaryStage);
-        enhanceController.showEnhanceScreen();
     }
 
     private void openCollectionScreen() {
@@ -133,42 +213,80 @@ public class GameController {
         shopController.showShopScreen();
     }
 
-    private void sellItem() {
-        // 아이템 판매 로직을 여기에 추가
-        if (inventory.length > 0) {
-            // 첫 번째 아이템을 판매하는 예제
-            String itemToSell = inventory[0];
-            int sellingPrice = calculateSellingPrice(itemToSell);
+    public void updateImage(String itemName) {
+        currentItem = itemName; // 현재 표시된 아이템 이름을 업데이트
+        Integer itemId = ITEM_ID_MAP.get(itemName); // ITEM_ID_MAP 사용
+        if (itemId == null) {
+            System.out.println("Item ID not found for: " + itemName);
+            return;
+        }
+        String imagePath = "/image/" + itemId + "-" + itemName + ".jpg";
+        InputStream imageStream = getClass().getResourceAsStream(imagePath);
+        if (imageStream == null) {
+            System.out.println("Image not found: " + imagePath);
+            return;
+        }
+        Image image = new Image(imageStream);
+        imageView.setImage(image);
+    }
 
-            // 자금 업데이트
-            playerFunds += sellingPrice;
+    public void enhanceItem(String currentItem) {
+        Integer currentItemId = getItemId(currentItem);
+        if (currentItemId == null) {
+            System.out.println("Invalid item: " + currentItem);
+            return;
+        }
 
-            // 아이템 목록 업데이트
-            inventory = removeItemFromInventory(inventory, itemToSell);
+        Integer nextItemId = currentItemId + 1;
+        String nextItem = getItemNameById(nextItemId);
+        if (nextItem == null) {
+            System.out.println("No further enhancement possible.");
+            updateImage(currentItem);
+            return;
+        }
 
-            // 업데이트된 자금과 아이템 목록을 화면에 반영
-            showGameScreen(); // 자금과 아이템 목록을 갱신하여 다시 화면 표시
+        Double probability = getEnhanceProbability(nextItem);
+        if (probability == null) {
+            probability = 0.0;
+        }
+
+        boolean isSuccess = determineEnhanceSuccess(probability);
+        System.out.println("Enhance success: " + isSuccess + " for item: " + currentItem);
+
+        if (isSuccess) {
+            updateImage(nextItem);
         } else {
-            showError("판매할 아이템이 없습니다.");
+            updateImage("돌");
         }
     }
 
-    private int calculateSellingPrice(String item) {
-        // 아이템에 따른 판매 가격을 계산하는 로직
-        return 100; // 예제 가격
+    private boolean determineEnhanceSuccess(double probability) {
+        double randomValue = Math.random() * 100;
+        return randomValue <= probability;
     }
 
-    private String[] removeItemFromInventory(String[] inventory, String itemToRemove) {
-        return Arrays.stream(inventory)
-                     .filter(item -> !item.equals(itemToRemove))
-                     .toArray(String[]::new);
+    private void updateFundsLabel() {
+        Label fundsLabel = (Label) ((VBox) ((BorderPane) primaryStage.getScene().getRoot()).getTop()).getChildren().get(1);
+        fundsLabel.setText("현재 자금: " + playerFunds);
     }
 
-    private void showError(String message) {
-        Stage errorStage = new Stage();
-        VBox vbox = new VBox(new Label(message));
-        Scene scene = new Scene(vbox, 200, 100);
-        errorStage.setScene(scene);
-        errorStage.show();
+    public void sellItem() {
+        if (currentItem != null) {
+            int sellingPrice = sellController.calculateSellingPrice(currentItem);
+            playerFunds += sellingPrice;
+            System.out.println(currentItem + "를 판매했습니다. 판매 금액: " + sellingPrice + " 현재 자금: " + playerFunds);
+            updateImage("돌"); // 판매 후 기본 이미지를 표시
+            currentItem = "돌"; // 현재 아이템을 기본 아이템으로 초기화
+            updateFundsLabel(); // 자금 레이블 업데이트
+        } else {
+            System.out.println("판매할 아이템이 없습니다.");
+        }
+    }
+
+
+    private String getCurrentItem() {
+        // 현재 이미지의 이름을 얻는 메소드 구현 필요
+        // 예를 들어, 현재 이미지 파일의 이름에서 아이템 이름을 추출하는 방식
+        return currentItem; // 현재 아이템을 반환
     }
 }
