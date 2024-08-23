@@ -25,6 +25,8 @@ public class GameController {
     private int playerFunds;
     private String[] inventory;
     private ImageView imageView;
+    private Label statusLabel; // 상태 표시를 위한 라벨 추가
+    private Label probabilityLabel; // 확률 표시를 위한 라벨 추가
 
     private SellController sellController;
     private EnhanceStoneController enhanceStoneController;
@@ -40,6 +42,12 @@ public class GameController {
         imageView.setFitWidth(400);
         imageView.setFitHeight(400);
         imageView.setPreserveRatio(true);
+        
+        this.statusLabel = new Label();
+        statusLabel.setFont(new Font(18)); // 상태 라벨 폰트 설정
+        this.probabilityLabel = new Label();
+        probabilityLabel.setFont(new Font(18)); // 확률 라벨 폰트 설정
+        
         this.sellController = new SellController();
         this.enhanceStoneController = new EnhanceStoneController(imageView, ItemData.ITEM_ID_MAP);
         this.itemValidator = new ItemValidator(); 
@@ -69,18 +77,13 @@ public class GameController {
 
     private void setupEnhanceButton(Button enhanceButton) {
         enhanceButton.setOnAction(e -> {
-            if (enhanceStoneController.enhanceItem(currentItem)) {
-                updateImage(currentItem); 
-            } else {
-                showAlert("강화 실패", "더 이상 진화 단계가 없습니다. 다른 루트를 찾으세요.");
-                updateImage("돌"); 
-                currentItem = "돌";
-            }
+            enhanceItem(currentItem);  // E 키를 눌렀을 때와 동일한 메서드 호출
+            updateStatusAndProbability(currentItem);  // 상태 및 확률 업데이트
         });
     }
 
     private void showAlert(String title, String content) {
-        Alert alert = new Alert(AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
@@ -114,10 +117,11 @@ public class GameController {
         sellButton.setOnAction(e -> {
             sellItem(); 
             updateImage("돌"); 
+            updateStatusAndProbability("돌"); // 판매 후 상태 및 확률 업데이트
         });
 
         VBox centerVBox = new VBox(10);
-        centerVBox.getChildren().addAll(imageView, enhanceButton);
+        centerVBox.getChildren().addAll(statusLabel, probabilityLabel, imageView, enhanceButton);
         centerVBox.setAlignment(Pos.CENTER);
 
         VBox rightTopVBox = new VBox(10);
@@ -156,6 +160,7 @@ public class GameController {
         borderPane.setBottom(bottomPane);
 
         updateImage(currentItem);
+        updateStatusAndProbability(currentItem); // 게임 화면 초기화 시 상태 및 확률 업데이트
 
         Scene gameScene = new Scene(borderPane, 1000, 800);
         primaryStage.setScene(gameScene);
@@ -165,6 +170,7 @@ public class GameController {
         gameScene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.E) {
                 enhanceItem(currentItem); 
+                updateStatusAndProbability(currentItem);
             }
         });
     }
@@ -210,7 +216,6 @@ public class GameController {
                 return true;
             }
         }
-
         // 실패 시 돌로 초기화
         System.out.println("강화 실패: " + currentItem + ". 돌로 초기화합니다.");
         this.currentItem = "돌";
@@ -232,6 +237,19 @@ public class GameController {
         }
         Image image = new Image(imageStream);
         imageView.setImage(image);
+    }
+
+    // 추가: 현재 상태 및 다음 단계 확률 업데이트
+    public void updateStatusAndProbability(String currentItem) {
+        statusLabel.setText("현재 아이템: " + currentItem);
+        
+        EnhanceStage stage = enhanceStoneController.getEnhanceStage(currentItem);
+        if (stage != null && !stage.getNextStages().isEmpty()) {
+            double totalProbability = stage.getNextStages().values().stream().mapToDouble(Double::doubleValue).sum();
+            probabilityLabel.setText("다음 단계로 넘어갈 확률: " + totalProbability + "%");
+        } else {
+            probabilityLabel.setText("강화 불가 현 단계에서 마지막 루트입니다.");
+        }
     }
 
     private void updateFundsLabel() {

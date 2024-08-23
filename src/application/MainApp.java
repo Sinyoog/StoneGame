@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Game Application");
+        primaryStage.setTitle("돌 강화 게임");
 
         // 로그인 화면을 표시
         LoginController loginController = new LoginController(primaryStage);
