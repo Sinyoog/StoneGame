@@ -1,101 +1,219 @@
 package Application;
 
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
-import javafx.scene.layout.VBox;
-import javafx.scene.control.Label;
-
+import javafx.scene.image.ImageView;  // 추가
 import java.io.InputStream;
 
 public class EnhanceStoneController {
-    private Stage primaryStage;
-    private GameController gameController;
-    private ImageView resultImageView;
+    private static final Map<String, EnhanceStage> ENHANCE_STAGE_MAP = new HashMap<>();
+    private String currentItem;
+    private ImageView imageView;
+    private Map<String, Integer> itemIdMap; // ITEM_ID_MAP을 위한 변수
 
-    public EnhanceStoneController(Stage primaryStage, GameController gameController) {
-        this.primaryStage = primaryStage;
-        this.gameController = gameController;
-        this.resultImageView = new ImageView();
-        resultImageView.setFitWidth(400);
-        resultImageView.setFitHeight(400);
-        resultImageView.setPreserveRatio(true);
+    public EnhanceStoneController(ImageView imageView, Map<String, Integer> itemIdMap) {
+        this.imageView = imageView;
+        this.itemIdMap = itemIdMap;
+    }
+    
+    public void validateItem(String itemName) {
+        if (!itemIdMap.containsKey(itemName)) {
+            System.out.println("Invalid item: " + itemName);
+        } else {
+            System.out.println("Item is valid: " + itemName);
+        }
     }
 
-    public void showEnhanceScreen() {
-        BorderPane borderPane = new BorderPane();
-        VBox vbox = new VBox();
+    static {
+        // 단계와 확률 정의
+        ENHANCE_STAGE_MAP.put("돌", new EnhanceStage(new HashMap<>() {{
+            put("석영", 80.0);
+            put("철", 19.0);
+            put("화석", 1.0);
+        }}, null));
 
-        // 강화할 아이템 이름을 입력받기 위한 UI 구성
-        Label label = new Label("아이템 이름 입력:");
-        Button enhanceButton = new Button("강화하기");
+        ENHANCE_STAGE_MAP.put("철", new EnhanceStage(new HashMap<>() {{
+            put("은", 100.0);
+        }}, 500));
 
-        enhanceButton.setOnAction(e -> {
-            String itemName = "돌"; // 예제에서는 고정된 아이템 이름을 사용
-            enhanceItem(itemName);
-        });
+        ENHANCE_STAGE_MAP.put("은", new EnhanceStage(new HashMap<>() {{
+            put("백금", 40.0);
+            put("금", 30.0);
+        }}, 5000));
 
-        vbox.getChildren().addAll(label, enhanceButton, resultImageView);
-        borderPane.setCenter(vbox);
+        ENHANCE_STAGE_MAP.put("백금", new EnhanceStage(new HashMap<>(), 180000));
 
-        Scene scene = new Scene(borderPane, 600, 500);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        ENHANCE_STAGE_MAP.put("금", new EnhanceStage(new HashMap<>() {{
+            put("순금", 37.5);
+        }}, 300000));
+
+        ENHANCE_STAGE_MAP.put("순금", new EnhanceStage(new HashMap<>(), 450000));
+
+        ENHANCE_STAGE_MAP.put("화석", new EnhanceStage(new HashMap<>() {{
+            put("암모나이트", 40.0);
+            put("랩터", 30.0);
+            put("새 화석", 30.0);
+        }}, 50000));
+
+        ENHANCE_STAGE_MAP.put("암모나이트", new EnhanceStage(new HashMap<>() {{
+            put("모사사우루스", 100.0);
+        }}, 500000));
+
+        ENHANCE_STAGE_MAP.put("랩터", new EnhanceStage(new HashMap<>() {{
+            put("티라노", 10.0);
+        }}, 1000000));
+
+        ENHANCE_STAGE_MAP.put("새 화석", new EnhanceStage(new HashMap<>() {{
+            put("프테라노돈", 15.0);
+        }}, 700000));
+
+        ENHANCE_STAGE_MAP.put("모사사우루스", new EnhanceStage(new HashMap<>() {{
+            put("운석", 0.1);
+        }}, 30000000));
+
+        ENHANCE_STAGE_MAP.put("프테라노돈", new EnhanceStage(new HashMap<>() {{
+            put("운석", 0.1);
+        }}, 40000000));
+
+        ENHANCE_STAGE_MAP.put("티라노", new EnhanceStage(new HashMap<>() {{
+            put("운석", 0.1);
+        }}, 50000000));
+
+        ENHANCE_STAGE_MAP.put("운석", new EnhanceStage(new HashMap<>(), 500000000));
+
+        ENHANCE_STAGE_MAP.put("파이어 오팔", new EnhanceStage(new HashMap<>(), 5000000));
+        
+        ENHANCE_STAGE_MAP.put("사파이어", new EnhanceStage(new HashMap<>() {{
+            put("레드 베릴", 50.0);
+        }}, 160000));
+
+        ENHANCE_STAGE_MAP.put("레드 베릴", new EnhanceStage(new HashMap<>(), 13500000));
+        
+        ENHANCE_STAGE_MAP.put("석영", new EnhanceStage(new HashMap<>() {{
+            put("자수정", 95.0); 
+        }}, 1000)); 
+        
+        ENHANCE_STAGE_MAP.put("자수정", new EnhanceStage(new HashMap<>() {{
+            put("시트린", 90.0);
+        }}, 2500));
+
+        ENHANCE_STAGE_MAP.put("시트린", new EnhanceStage(new HashMap<>() {{
+            put("페리도트", 85.0);
+        }}, 5000));
+        
+        ENHANCE_STAGE_MAP.put("페리도트", new EnhanceStage(new HashMap<>() {{
+            put("토파즈", 85.0);
+        }}, 10000));
+        
+        ENHANCE_STAGE_MAP.put("토파즈", new EnhanceStage(new HashMap<>() {{
+            put("탄자나이트", 75.0);
+        }}, 20000));
+        
+        ENHANCE_STAGE_MAP.put("탄자나이트", new EnhanceStage(new HashMap<>() {{
+            put("오팔", 70.0);
+        }}, 40000));
+        
+        ENHANCE_STAGE_MAP.put("오팔", new EnhanceStage(new HashMap<>() {{
+            put("파이어 오팔", 10.0);
+            put("사파이어", 50.0);
+        }}, 80000));
+        
+        ENHANCE_STAGE_MAP.put("사파이어", new EnhanceStage(new HashMap<>() {{
+            put("에메랄드", 50.0);
+        }}, 160000));
+        
+        ENHANCE_STAGE_MAP.put("에메랄드", new EnhanceStage(new HashMap<>() {{
+            put("레드 베릴", 10.0);
+            put("루비", 30.0);
+        }}, 300000));
+        
+        ENHANCE_STAGE_MAP.put("루비", new EnhanceStage(new HashMap<>() {{
+            put("알렉산드라이트", 30.0);
+        }}, 6000000));
+        ENHANCE_STAGE_MAP.put("알렉산드라이트", new EnhanceStage(new HashMap<>() {{
+            put("다이아몬드", 20.0);
+        }}, 8000000));
+        ENHANCE_STAGE_MAP.put("다이아몬드", new EnhanceStage(new HashMap<>() {{
+        	put("세렌디바이트", 9.9);
+            put("블랙 다이아몬드", 5.0);
+            put("핑크 다이아몬드", 1.0);
+            put("레드 다이아몬드", 0.1);
+        }}, 15000000));
+        ENHANCE_STAGE_MAP.put("세렌디바이트", new EnhanceStage(new HashMap<>() {{
+            put("타파이트", 5.0);
+        }}, 30000000));
+        ENHANCE_STAGE_MAP.put("타파이트", new EnhanceStage(new HashMap<>() {{
+            put("우라늄", 1.0);
+        }}, 50000000));
+        ENHANCE_STAGE_MAP.put("우라늄", new EnhanceStage(new HashMap<>() {{
+            put("완벽한 돌", 0.05);
+        }}, 100000000));
+
+        ENHANCE_STAGE_MAP.put("블랙 다이아몬드", new EnhanceStage(new HashMap<>(), 20000000));
+        ENHANCE_STAGE_MAP.put("핑크 다이아몬드", new EnhanceStage(new HashMap<>(), 40000000));
+        ENHANCE_STAGE_MAP.put("레드 다이아몬드", new EnhanceStage(new HashMap<>(), 200000000));
+        ENHANCE_STAGE_MAP.put("완벽한 돌", new EnhanceStage(new HashMap<>(), 1000000000));
+    }
+    
+    public Double getEnhanceProbability(String itemName) {
+        EnhanceStage stage = getEnhanceStage(itemName);
+        if (stage == null) {
+            return null; // 또는 0.0
+        }
+        if (!stage.getNextStages().isEmpty()) {
+            return stage.getNextStages().values().iterator().next();
+        }
+        return 0.0;
     }
 
-    public void enhanceItem(String itemName) {
-        if (itemName == null || itemName.isEmpty()) {
-            System.out.println("Item name is required for enhancement.");
+    public EnhanceStage getEnhanceStage(String itemName) {
+        return ENHANCE_STAGE_MAP.get(itemName);
+    }
+
+    public boolean enhanceItem(String currentItem) {
+        EnhanceStage stage = getEnhanceStage(currentItem);
+        if (stage == null) {
+            System.out.println("Invalid item: " + currentItem);
+            return false;
+        }
+
+        if (stage.getNextStages().isEmpty()) {
+            System.out.println("No further enhancement possible.");
+            updateImage(currentItem);
+            return false;
+        }
+
+        double randomValue = Math.random() * 100;
+        double cumulativeProbability = 0.0;
+
+        for (Map.Entry<String, Double> entry : stage.getNextStages().entrySet()) {
+            cumulativeProbability += entry.getValue();
+            System.out.println("Random Value: " + randomValue + ", Cumulative Probability: " + cumulativeProbability);
+            if (randomValue <= cumulativeProbability) {
+                System.out.println("Enhance success: " + entry.getKey());
+                this.currentItem = entry.getKey();
+                updateImage(this.currentItem);
+                return true;
+            }
+        }
+        System.out.println("Enhance failed: " + currentItem);
+        return false;
+    }
+
+    public void updateImage(String itemName) {
+        Integer itemId = itemIdMap.get(itemName);
+        if (itemId == null) {
+            System.out.println("Item ID not found for: " + itemName);
             return;
         }
-
-        // 강화 확률을 가져옵니다.
-        Double probability = gameController.getEnhanceProbability(itemName);
-
-        if (probability != null) {
-            boolean isSuccess = Math.random() * 100 <= probability;
-            if (isSuccess) {
-                System.out.println(itemName + " 강화 성공!");
-                // 강화 성공 시 이미지 업데이트
-                String nextItem = getNextItem(itemName);
-                if (nextItem != null) {
-                    gameController.updateImage(nextItem); // 강화된 아이템 이미지로 업데이트
-                    updateResultImage(true); // 성공 이미지로 업데이트
-                } else {
-                    System.out.println("No next item found for: " + itemName);
-                    updateResultImage(false); // 실패 이미지로 업데이트
-                }
-            } else {
-                System.out.println(itemName + " 강화 실패!");
-                // 강화 실패 시 초기 단계로 돌아가기
-                gameController.updateImage("돌");
-                updateResultImage(false); // 실패 이미지로 업데이트
-            }
-        } else {
-            System.out.println("No enhance probability found for " + itemName);
+        String imagePath = "/image/" + itemId + "-" + itemName + ".jpg";
+        InputStream imageStream = getClass().getResourceAsStream(imagePath);
+        if (imageStream == null) {
+            System.out.println("Image not found: " + imagePath);
+            return;
         }
-    }
-
-    private String getNextItem(String currentItem) {
-        // 현재 아이템의 ID를 가져와서 다음 아이템을 반환합니다.
-        int currentItemId = gameController.getItemId(currentItem);
-        int nextItemId = currentItemId + 1; // 다음 단계 아이템 ID
-        return gameController.getItemNameById(nextItemId);
-    }
-
-    private void updateResultImage(boolean success) {
-        String imagePath = success ? "/images/enhanced.jpg" : "/images/original.jpg";
-        try (InputStream imageStream = getClass().getResourceAsStream(imagePath)) {
-            if (imageStream == null) {
-                throw new IllegalArgumentException("Image file not found: " + imagePath);
-            }
-            Image image = new Image(imageStream);
-            resultImageView.setImage(image);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Image image = new Image(imageStream);
+        imageView.setImage(image);
     }
 }

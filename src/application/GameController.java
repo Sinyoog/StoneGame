@@ -9,7 +9,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
@@ -17,7 +18,6 @@ import javafx.scene.text.Font;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.HashMap;
 
 public class GameController {
     private Stage primaryStage;
@@ -25,50 +25,11 @@ public class GameController {
     private int playerFunds;
     private String[] inventory;
     private ImageView imageView;
+
     private SellController sellController;
-    private String currentItem; // 현재 표시된 아이템 이름을 저장하는 필드
-
-    // 아이템 ID 정의
-    private static final Map<String, Integer> ITEM_ID_MAP = new HashMap<>() {{
-        put("돌", 1);
-        put("석영", 2);
-        put("자수정", 3);
-        put("시트린", 4);
-        put("페리도트", 5);
-        put("토파즈", 6);
-        put("탄자나이트", 7);
-        put("오팔", 8);
-        put("사파이어", 9);
-        put("에메랄드", 10);
-        put("루비", 11);
-        put("알렉산드라이트", 12);
-        put("다이아몬드", 13);
-        put("세렌디바이트", 14);
-        put("타파이트", 15);
-        put("우라늄", 16);
-        put("완벽한돌", 17);
-    }};
-
-    // 강화 확률 정의
-    private static final Map<String, Double> ENHANCE_PROBABILITY_MAP = new HashMap<>() {{
-        put("돌", 0.0);
-        put("석영", 80.0);
-        put("자수정", 95.0);
-        put("시트린", 90.0);
-        put("페리도트", 85.0);
-        put("토파즈", 80.0);
-        put("탄자나이트", 75.0);
-        put("오팔", 70.0);
-        put("사파이어", 60.0);
-        put("에메랄드", 50.0);
-        put("루비", 40.0);
-        put("알렉산드라이트", 30.0);
-        put("다이아몬드", 20.0);
-        put("세렌디바이트", 10.0);
-        put("타파이트", 5.0);
-        put("우라늄", 1.0);
-        put("완벽한돌", 0.05);
-    }};
+    private EnhanceStoneController enhanceStoneController;
+    private ItemValidator itemValidator; 
+    private String currentItem;
 
     public GameController(Stage primaryStage, String playerId, int initialFunds, String[] initialInventory) {
         this.primaryStage = primaryStage;
@@ -80,15 +41,17 @@ public class GameController {
         imageView.setFitHeight(400);
         imageView.setPreserveRatio(true);
         this.sellController = new SellController();
+        this.enhanceStoneController = new EnhanceStoneController(imageView, ItemData.ITEM_ID_MAP);
+        this.itemValidator = new ItemValidator(); 
         this.currentItem = "돌";
     }
 
     public Integer getItemId(String itemName) {
-        return ITEM_ID_MAP.get(itemName); // ITEM_ID_MAP1 대신 ITEM_ID_MAP 사용
+        return ItemData.ITEM_ID_MAP.get(itemName);
     }
 
     public String getItemNameById(int id) {
-        for (Map.Entry<String, Integer> entry : ITEM_ID_MAP.entrySet()) {
+        for (Map.Entry<String, Integer> entry : ItemData.ITEM_ID_MAP.entrySet()) {
             if (entry.getValue() == id) {
                 return entry.getKey();
             }
@@ -97,27 +60,37 @@ public class GameController {
     }
 
     public Double getEnhanceProbability(String itemName) {
-        Double probability = ENHANCE_PROBABILITY_MAP.get(itemName);
-        if (probability == null) {
-            System.out.println("No enhance probability found for: " + itemName);
-            return 0.0;
-        }
-        System.out.println("Retrieved enhance probability for " + itemName + ": " + probability);
-        return probability;
+        return enhanceStoneController.getEnhanceProbability(itemName);
     }
 
     public Integer getItemPrice(String itemName) {
-        return sellController.calculateSellingPrice(itemName); // SellController에서 가격 계산
+        return sellController.calculateSellingPrice(itemName);
     }
 
     private void setupEnhanceButton(Button enhanceButton) {
-        enhanceButton.setOnAction(e -> enhanceItem(currentItem)); // 현재 아이템으로 강화하기
+        enhanceButton.setOnAction(e -> {
+            if (enhanceStoneController.enhanceItem(currentItem)) {
+                updateImage(currentItem); 
+            } else {
+                showAlert("강화 실패", "더 이상 진화 단계가 없습니다. 다른 루트를 찾으세요.");
+                updateImage("돌"); 
+                currentItem = "돌";
+            }
+        });
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     public void showGameScreen() {
         Label welcomeLabel = new Label("사용자: " + playerId);
         welcomeLabel.setFont(new Font(24));
-        Label fundsLabel = new Label("현재 자금: " + playerFunds);
+        Label fundsLabel = new Label("현재 자금: " + playerFunds + "원");
         fundsLabel.setFont(new Font(24));
 
         VBox topLeftBox = new VBox(10);
@@ -139,8 +112,8 @@ public class GameController {
 
         Button sellButton = new Button("판매하기");
         sellButton.setOnAction(e -> {
-            sellItem(); // 판매하기 기능 호출
-            updateImage("돌"); // 판매 후 기본 이미지를 표시
+            sellItem(); 
+            updateImage("돌"); 
         });
 
         VBox centerVBox = new VBox(10);
@@ -182,7 +155,6 @@ public class GameController {
         borderPane.setRight(rightPane);
         borderPane.setBottom(bottomPane);
 
-        // 초기 이미지를 표시
         updateImage(currentItem);
 
         Scene gameScene = new Scene(borderPane, 1000, 800);
@@ -190,10 +162,9 @@ public class GameController {
         primaryStage.centerOnScreen();
         primaryStage.show();
 
-        // E 키를 눌렀을 때 강화하기 버튼 기능 수행
         gameScene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.E) {
-                enhanceItem(currentItem); // 현재 아이템으로 강화하기
+                enhanceItem(currentItem); 
             }
         });
     }
@@ -213,9 +184,42 @@ public class GameController {
         shopController.showShopScreen();
     }
 
+    public boolean enhanceItem(String currentItem) {
+        itemValidator.validateItem(currentItem);
+
+        EnhanceStage stage = enhanceStoneController.getEnhanceStage(currentItem);
+        if (stage == null) {
+            System.out.println("Invalid item: " + currentItem);
+            return false;
+        }
+
+        if (stage.getNextStages().isEmpty()) {
+            System.out.println("이 진화 루트에서 마지막 단계입니다.");
+            updateImage(currentItem);
+            return false;
+        }
+
+        double randomValue = Math.random() * 100;
+        double cumulativeProbability = 0.0;
+
+        for (Map.Entry<String, Double> entry : stage.getNextStages().entrySet()) {
+            cumulativeProbability += entry.getValue();
+            if (randomValue <= cumulativeProbability) {
+                this.currentItem = entry.getKey();
+                updateImage(this.currentItem);
+                return true;
+            }
+        }
+
+        // 실패 시 돌로 초기화
+        System.out.println("강화 실패: " + currentItem + ". 돌로 초기화합니다.");
+        this.currentItem = "돌";
+        updateImage(this.currentItem);
+        return false;
+    }
+
     public void updateImage(String itemName) {
-        currentItem = itemName; // 현재 표시된 아이템 이름을 업데이트
-        Integer itemId = ITEM_ID_MAP.get(itemName); // ITEM_ID_MAP 사용
+        Integer itemId = ItemData.ITEM_ID_MAP.get(itemName);
         if (itemId == null) {
             System.out.println("Item ID not found for: " + itemName);
             return;
@@ -230,41 +234,6 @@ public class GameController {
         imageView.setImage(image);
     }
 
-    public void enhanceItem(String currentItem) {
-        Integer currentItemId = getItemId(currentItem);
-        if (currentItemId == null) {
-            System.out.println("Invalid item: " + currentItem);
-            return;
-        }
-
-        Integer nextItemId = currentItemId + 1;
-        String nextItem = getItemNameById(nextItemId);
-        if (nextItem == null) {
-            System.out.println("No further enhancement possible.");
-            updateImage(currentItem);
-            return;
-        }
-
-        Double probability = getEnhanceProbability(nextItem);
-        if (probability == null) {
-            probability = 0.0;
-        }
-
-        boolean isSuccess = determineEnhanceSuccess(probability);
-        System.out.println("Enhance success: " + isSuccess + " for item: " + currentItem);
-
-        if (isSuccess) {
-            updateImage(nextItem);
-        } else {
-            updateImage("돌");
-        }
-    }
-
-    private boolean determineEnhanceSuccess(double probability) {
-        double randomValue = Math.random() * 100;
-        return randomValue <= probability;
-    }
-
     private void updateFundsLabel() {
         Label fundsLabel = (Label) ((VBox) ((BorderPane) primaryStage.getScene().getRoot()).getTop()).getChildren().get(1);
         fundsLabel.setText("현재 자금: " + playerFunds);
@@ -275,18 +244,13 @@ public class GameController {
             int sellingPrice = sellController.calculateSellingPrice(currentItem);
             playerFunds += sellingPrice;
             System.out.println(currentItem + "를 판매했습니다. 판매 금액: " + sellingPrice + " 현재 자금: " + playerFunds);
-            updateImage("돌"); // 판매 후 기본 이미지를 표시
-            currentItem = "돌"; // 현재 아이템을 기본 아이템으로 초기화
+            
+            // 돌로 초기화
+            currentItem = "돌";
+            updateImage(currentItem);
             updateFundsLabel(); // 자금 레이블 업데이트
         } else {
             System.out.println("판매할 아이템이 없습니다.");
         }
-    }
-
-
-    private String getCurrentItem() {
-        // 현재 이미지의 이름을 얻는 메소드 구현 필요
-        // 예를 들어, 현재 이미지 파일의 이름에서 아이템 이름을 추출하는 방식
-        return currentItem; // 현재 아이템을 반환
     }
 }
