@@ -2,6 +2,8 @@ package Application;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -22,6 +24,9 @@ public class ViewCollectionController {
     private static final String ITEM_IMAGE_DIRECTORY = "/image"; // 아이템 이미지 디렉토리
     private static final int GRID_COLS = 7; // GridPane의 열 수
     private static final int GRID_ROWS = 5; // GridPane의 행 수
+    private static final int IMAGE_WIDTH = 92; // 이미지 너비
+    private static final int IMAGE_HEIGHT = 91; // 이미지 높이
+    private static final int GAP = 20; // 셀 간격
 
     // 아이템 위치를 저장할 배열
     private ImageView[][] itemImages;
@@ -30,9 +35,9 @@ public class ViewCollectionController {
         this.primaryStage = primaryStage;
         this.gameController = gameController;
         this.collectionGrid = new GridPane();
-        this.collectionGrid.setHgap(10);
-        this.collectionGrid.setVgap(10);
-        this.collectionGrid.setPadding(new Insets(10));
+        this.collectionGrid.setHgap(GAP);
+        this.collectionGrid.setVgap(GAP);
+        this.collectionGrid.setPadding(new Insets(100));
 
         // 셀 초기화
         itemImages = new ImageView[GRID_COLS][GRID_ROWS];
@@ -43,13 +48,24 @@ public class ViewCollectionController {
     }
 
     private void initializeGrid() {
+        // GridPane의 크기를 설정합니다.
+        collectionGrid.setPrefWidth(GRID_COLS * IMAGE_WIDTH + (GRID_COLS - 1) * GAP);
+        collectionGrid.setPrefHeight(GRID_ROWS * IMAGE_HEIGHT + (GRID_ROWS - 1) * GAP);
+
         for (int row = 0; row < GRID_ROWS; row++) {
             for (int col = 0; col < GRID_COLS; col++) {
                 ImageView imageView = new ImageView();
-                imageView.setFitWidth(92);
-                imageView.setFitHeight(91);
+                imageView.setFitWidth(IMAGE_WIDTH);
+                imageView.setFitHeight(IMAGE_HEIGHT);
                 imageView.setPreserveRatio(true);
                 imageView.setSmooth(true);
+
+                // GridPane의 셀 정렬을 설정합니다.
+                GridPane.setHalignment(imageView, HPos.CENTER);
+                GridPane.setValignment(imageView, VPos.CENTER);
+                GridPane.setColumnSpan(imageView, 1); // 셀에서 이미지가 전체적으로 정렬되도록 설정
+                GridPane.setRowSpan(imageView, 1);
+
                 collectionGrid.add(imageView, col, row);
                 itemImages[col][row] = imageView;
             }
