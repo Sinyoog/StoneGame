@@ -23,7 +23,7 @@ public class ItemData {
         ITEM_ID_MAP.put("세렌디바이트", 14);
         ITEM_ID_MAP.put("타파이트", 15);
         ITEM_ID_MAP.put("우라늄", 16);
-        ITEM_ID_MAP.put("완벽한돌", 17);
+        ITEM_ID_MAP.put("완벽한 돌", 17);
         ITEM_ID_MAP.put("철", 18);        
         ITEM_ID_MAP.put("은", 19);
         ITEM_ID_MAP.put("백금", 20);
@@ -38,7 +38,7 @@ public class ItemData {
         ITEM_ID_MAP.put("프테라노돈", 29);
         ITEM_ID_MAP.put("운석", 30);
         ITEM_ID_MAP.put("파이어 오팔", 31);
-        ITEM_ID_MAP.put("레드 배릴", 32);
+        ITEM_ID_MAP.put("레드 베릴", 32);
         ITEM_ID_MAP.put("블랙 다이아몬드", 33);
         ITEM_ID_MAP.put("핑크 다이아몬드", 34);
         ITEM_ID_MAP.put("레드 다이아몬드", 35);

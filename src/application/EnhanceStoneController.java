@@ -34,11 +34,11 @@ public class EnhanceStoneController {
         }}, null));
 
         ENHANCE_STAGE_MAP.put("철", new EnhanceStage(new HashMap<>() {{
-            put("은", 100.0);
+            put("은", 70.0);
         }}, 500));
 
         ENHANCE_STAGE_MAP.put("은", new EnhanceStage(new HashMap<>() {{
-            put("백금", 40.0);
+            put("백금", 30.0);
             put("금", 30.0);
         }}, 5000));
 
@@ -52,20 +52,20 @@ public class EnhanceStoneController {
 
         ENHANCE_STAGE_MAP.put("화석", new EnhanceStage(new HashMap<>() {{
             put("암모나이트", 40.0);
-            put("랩터", 30.0);
-            put("새 화석", 30.0);
+            put("랩터", 10.0);
+            put("새 화석", 15.0);
         }}, 50000));
 
         ENHANCE_STAGE_MAP.put("암모나이트", new EnhanceStage(new HashMap<>() {{
-            put("모사사우루스", 100.0);
+            put("모사사우루스", 5.0);
         }}, 500000));
 
         ENHANCE_STAGE_MAP.put("랩터", new EnhanceStage(new HashMap<>() {{
-            put("티라노", 10.0);
+            put("티라노", 5.0);
         }}, 1000000));
 
         ENHANCE_STAGE_MAP.put("새 화석", new EnhanceStage(new HashMap<>() {{
-            put("프테라노돈", 15.0);
+            put("프테라노돈", 5.0);
         }}, 700000));
 
         ENHANCE_STAGE_MAP.put("모사사우루스", new EnhanceStage(new HashMap<>() {{

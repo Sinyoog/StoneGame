@@ -24,14 +24,17 @@ public class GameController {
     private String playerId;
     private int playerFunds;
     private String[] inventory;
+    private String itemName;
     private ImageView imageView;
-    private Label statusLabel; // 상태 표시를 위한 라벨 추가
-    private Label probabilityLabel; // 확률 표시를 위한 라벨 추가
+    private Label statusLabel;
+    private Label probabilityLabel;
 
     private SellController sellController;
     private EnhanceStoneController enhanceStoneController;
-    private ItemValidator itemValidator; 
+    private ItemValidator itemValidator;
     private String currentItem;
+    private ViewCollectionController viewCollectionController;
+    
 
     public GameController(Stage primaryStage, String playerId, int initialFunds, String[] initialInventory) {
         this.primaryStage = primaryStage;
@@ -44,14 +47,16 @@ public class GameController {
         imageView.setPreserveRatio(true);
         
         this.statusLabel = new Label();
-        statusLabel.setFont(new Font(18)); // 상태 라벨 폰트 설정
+        statusLabel.setFont(new Font(18));
         this.probabilityLabel = new Label();
-        probabilityLabel.setFont(new Font(18)); // 확률 라벨 폰트 설정
+        probabilityLabel.setFont(new Font(18));
         
         this.sellController = new SellController();
         this.enhanceStoneController = new EnhanceStoneController(imageView, ItemData.ITEM_ID_MAP);
-        this.itemValidator = new ItemValidator(); 
+        this.itemValidator = new ItemValidator();
         this.currentItem = "돌";
+        
+        viewCollectionController = new ViewCollectionController(primaryStage, this);
     }
 
     public Integer getItemId(String itemName) {
@@ -90,7 +95,7 @@ public class GameController {
         alert.showAndWait();
     }
 
-    public void showGameScreen() {
+    public Scene showGameScreen() {
         Label welcomeLabel = new Label("사용자: " + playerId);
         welcomeLabel.setFont(new Font(24));
         Label fundsLabel = new Label("현재 자금: " + playerFunds + "원");
@@ -173,6 +178,7 @@ public class GameController {
                 updateStatusAndProbability(currentItem);
             }
         });
+		return gameScene;
     }
 
     private void openInventoryScreen() {
@@ -263,6 +269,13 @@ public class GameController {
             playerFunds += sellingPrice;
             System.out.println(currentItem + "를 판매했습니다. 판매 금액: " + sellingPrice + " 현재 자금: " + playerFunds);
             
+            viewCollectionController.updateItemImage(itemName);
+            
+            // 판매된 아이템을 도감에 업데이트
+            if (viewCollectionController != null) {
+                viewCollectionController.updateItemImage(currentItem);
+            }
+            
             // 돌로 초기화
             currentItem = "돌";
             updateImage(currentItem);
@@ -270,5 +283,8 @@ public class GameController {
         } else {
             System.out.println("판매할 아이템이 없습니다.");
         }
+    }
+    public void setViewCollectionController(ViewCollectionController controller) {
+        this.viewCollectionController = controller;
     }
 }
