@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCode;
@@ -28,6 +29,8 @@ public class GameController {
     private ImageView imageView;
     private Label statusLabel;
     private Label probabilityLabel;
+    private ImageView itemImageView;
+    private BorderPane borderPane;
 
     private SellController sellController;
     private EnhanceStoneController enhanceStoneController;
@@ -45,6 +48,7 @@ public class GameController {
         imageView.setFitWidth(400);
         imageView.setFitHeight(400);
         imageView.setPreserveRatio(true);
+        itemImageView = new ImageView();
         
         this.statusLabel = new Label();
         statusLabel.setFont(new Font(18));
@@ -149,7 +153,8 @@ public class GameController {
         rightMiddleVBox.setAlignment(Pos.CENTER_RIGHT);
         rightMiddleVBox.setPadding(new Insets(10));
 
-        BorderPane borderPane = new BorderPane();
+        // 기존의 borderPane 인스턴스를 사용하지 않고 새로 생성한 borderPane을 클래스 멤버 변수에 할당
+        borderPane = new BorderPane();
         borderPane.setTop(topLeftBox);
         borderPane.setCenter(centerVBox);
 
@@ -178,8 +183,9 @@ public class GameController {
                 updateStatusAndProbability(currentItem);
             }
         });
-		return gameScene;
+        return gameScene;
     }
+
 
     private void openInventoryScreen() {
         InventoryController inventoryController = new InventoryController(primaryStage, inventory, this);
@@ -192,10 +198,11 @@ public class GameController {
     }
 
     private void openShopScreen() {
-        ShopController shopController = new ShopController(primaryStage, this);
+        System.out.println("Shop button clicked!");
+        ShopController shopController = new ShopController(primaryStage, this, imageView);
         shopController.showShopScreen();
     }
-
+    
     public boolean enhanceItem(String currentItem) {
         itemValidator.validateItem(currentItem);
 
@@ -236,13 +243,21 @@ public class GameController {
             return;
         }
         String imagePath = "/image/" + itemId + "-" + itemName + ".jpg";
+        System.out.println("Attempting to load image from path: " + imagePath);
+        
         InputStream imageStream = getClass().getResourceAsStream(imagePath);
         if (imageStream == null) {
             System.out.println("Image not found: " + imagePath);
             return;
         }
-        Image image = new Image(imageStream);
-        imageView.setImage(image);
+        
+        Image newImage = new Image(imageStream, imageView.getFitWidth(), imageView.getFitHeight(), true, true);
+        imageView.setImage(newImage);
+        System.out.println("Image updated successfully to: " + itemName);
+    }
+
+    public String getCurrentItem() {
+        return currentItem;
     }
 
     // 추가: 현재 상태 및 다음 단계 확률 업데이트
@@ -258,33 +273,72 @@ public class GameController {
         }
     }
 
-    private void updateFundsLabel() {
-        Label fundsLabel = (Label) ((VBox) ((BorderPane) primaryStage.getScene().getRoot()).getTop()).getChildren().get(1);
-        fundsLabel.setText("현재 자금: " + playerFunds);
+    public void updateFundsLabel() {
+        // 예를 들어, BorderPane에서 상단에 위치한 VBox를 참조한다고 가정합니다.
+        // VBox가 실제로 BorderPane에 설정된 것이 맞는지 확인해야 합니다.
+        if (borderPane.getTop() instanceof VBox) {
+            VBox topLeftBox = (VBox) borderPane.getTop();
+            
+            // topLeftBox에서 자금 레이블을 찾고 업데이트합니다.
+            for (Node node : topLeftBox.getChildren()) {
+                if (node instanceof Label) {
+                    Label label = (Label) node;
+                    if (label.getText().startsWith("현재 자금:")) {
+                        label.setText("현재 자금: " + playerFunds + "원");
+                    }
+                }
+            }
+        } else {
+            // 잘못된 형식이거나 설정되지 않은 경우 처리합니다.
+            System.out.println("상단 영역이 VBox가 아닙니다.");
+        }
     }
 
     public void sellItem() {
-        if (currentItem != null) {
+        if (currentItem != null && !currentItem.equals("돌")) {
             int sellingPrice = sellController.calculateSellingPrice(currentItem);
             playerFunds += sellingPrice;
             System.out.println(currentItem + "를 판매했습니다. 판매 금액: " + sellingPrice + " 현재 자금: " + playerFunds);
-            
-            viewCollectionController.updateItemImage(itemName);
-            
-            // 판매된 아이템을 도감에 업데이트
-            if (viewCollectionController != null) {
-                viewCollectionController.updateItemImage(currentItem);
-            }
-            
-            // 돌로 초기화
-            currentItem = "돌";
+
+            // 판매 후 상태 업데이트
+            currentItem = "돌"; // 판매 후 아이템을 '돌'로 초기화
             updateImage(currentItem);
+            updateStatusAndProbability(currentItem);
             updateFundsLabel(); // 자금 레이블 업데이트
         } else {
             System.out.println("판매할 아이템이 없습니다.");
         }
     }
+
+    public void setCurrentItem(String itemName) {
+        this.currentItem = itemName;
+        System.out.println("Setting current item to: " + itemName); // 디버깅 로그
+        updateImage(currentItem);
+        updateStatusAndProbability(currentItem);
+    }
+
+    public void updateItemImage(String imagePath) {
+        // 이미지 업데이트
+        Image image = new Image(getClass().getResourceAsStream(imagePath));
+        imageView.setImage(image);
+    }
+
     public void setViewCollectionController(ViewCollectionController controller) {
         this.viewCollectionController = controller;
+    }
+    public int getPlayerFunds() {
+        return playerFunds;
+    }
+    private String getImagePathForItem(String itemName) {
+        // 아이템 이름을 기반으로 파일 경로를 반환합니다.
+        Integer itemId = ItemData.ITEM_ID_MAP.get(itemName);
+        if (itemId != null) {
+            return "/image/" + itemId + "-" + itemName + ".jpg";
+        }
+        return null;
+    }
+    // 자금을 차감하는 메소드
+    public void deductFunds(int amount) {
+        playerFunds -= amount;
     }
 }

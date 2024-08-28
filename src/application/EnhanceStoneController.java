@@ -83,10 +83,6 @@ public class EnhanceStoneController {
         ENHANCE_STAGE_MAP.put("운석", new EnhanceStage(new HashMap<>(), 500000000));
 
         ENHANCE_STAGE_MAP.put("파이어 오팔", new EnhanceStage(new HashMap<>(), 5000000));
-        
-        ENHANCE_STAGE_MAP.put("사파이어", new EnhanceStage(new HashMap<>() {{
-            put("레드 베릴", 50.0);
-        }}, 160000));
 
         ENHANCE_STAGE_MAP.put("레드 베릴", new EnhanceStage(new HashMap<>(), 13500000));
         
