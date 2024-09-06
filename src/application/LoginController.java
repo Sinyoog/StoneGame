@@ -17,7 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class LoginController {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/MY/OneDrive/바탕 화면/datastore/test.db";
+	private static final String DB_URL = "jdbc:sqlite:datastore/test.db";
     private Stage primaryStage;
 
     public LoginController(Stage primaryStage) {

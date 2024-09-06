@@ -5,7 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class GameDatabase {
-	private static final String DB_URL = "jdbc:sqlite:C:/Users/MY/OneDrive/바탕 화면/datastore/game.db";
+	private static final String DB_URL = "jdbc:sqlite:datastore/test.db";
+
 
     public static Connection connect() throws SQLException {
         return DriverManager.getConnection(DB_URL);
