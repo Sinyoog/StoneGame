@@ -100,6 +100,9 @@ public class GameController {
     }
 
     public Scene showGameScreen() {
+        // 먼저 gameScene 변수를 선언합니다.
+        Scene gameScene;
+        
         Label welcomeLabel = new Label("사용자: " + playerId);
         welcomeLabel.setFont(new Font(24));
         Label fundsLabel = new Label("현재 자금: " + playerFunds + "원");
@@ -110,19 +113,19 @@ public class GameController {
         topLeftBox.setAlignment(Pos.TOP_LEFT);
         topLeftBox.setPadding(new Insets(10));
 
-        Button enhanceButton = new Button("강화하기");
+        Button enhanceButton = new Button("[E] 강화하기");
         setupEnhanceButton(enhanceButton);
 
-        Button viewCollectionButton = new Button("도감 보기");
+        Button viewCollectionButton = new Button("[V] 도감 보기");
         viewCollectionButton.setOnAction(e -> openCollectionScreen());
 
         Button inventoryButton = new Button("인벤토리");
         inventoryButton.setOnAction(e -> openInventoryScreen());
 
-        Button shopButton = new Button("상점");
+        Button shopButton = new Button("[Q] 상점");
         shopButton.setOnAction(e -> openShopScreen());
 
-        Button sellButton = new Button("판매하기");
+        Button sellButton = new Button("[S] 판매하기");
         sellButton.setOnAction(e -> {
             sellItem(); 
             updateImage("돌"); 
@@ -153,7 +156,7 @@ public class GameController {
         rightMiddleVBox.setAlignment(Pos.CENTER_RIGHT);
         rightMiddleVBox.setPadding(new Insets(10));
 
-        // 기존의 borderPane 인스턴스를 사용하지 않고 새로 생성한 borderPane을 클래스 멤버 변수에 할당
+        // BorderPane을 새로 생성하고 멤버 변수에 할당합니다.
         borderPane = new BorderPane();
         borderPane.setTop(topLeftBox);
         borderPane.setCenter(centerVBox);
@@ -172,17 +175,32 @@ public class GameController {
         updateImage(currentItem);
         updateStatusAndProbability(currentItem); // 게임 화면 초기화 시 상태 및 확률 업데이트
 
-        Scene gameScene = new Scene(borderPane, 1000, 800);
+        String cssPath = getClass().getResource("/css/GameUi.css").toExternalForm();
+        
+        // Scene을 생성하고 초기화합니다.
+        gameScene = new Scene(borderPane, 1000, 800);
+        gameScene.getStylesheets().add(cssPath);
+        
         primaryStage.setScene(gameScene);
         primaryStage.centerOnScreen();
         primaryStage.show();
 
+        // 키보드 이벤트 핸들러 설정
         gameScene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.E) {
                 enhanceItem(currentItem); 
                 updateStatusAndProbability(currentItem);
+            } else if (event.getCode() == KeyCode.S) {
+                sellItem();
+                updateImage("돌"); 
+                updateStatusAndProbability("돌");
+            } else if (event.getCode() == KeyCode.V) {
+                openCollectionScreen();
+            } else if (event.getCode() == KeyCode.Q) {
+                openShopScreen();
             }
         });
+
         return gameScene;
     }
 
@@ -262,8 +280,13 @@ public class GameController {
 
     // 추가: 현재 상태 및 다음 단계 확률 업데이트
     public void updateStatusAndProbability(String currentItem) {
-        statusLabel.setText("현재 아이템: " + currentItem);
+        // 현재 아이템의 판매 가격을 가져옵니다.
+        Integer sellingPrice = sellController.calculateSellingPrice(currentItem);
         
+        // 상태 레이블을 현재 아이템과 함께 판매 가격을 포함하도록 업데이트합니다.
+        statusLabel.setText("현재 아이템: " + currentItem + " (판매 가격: " + sellingPrice + "원)");
+        
+        // 현재 아이템의 강화 단계와 확률을 업데이트합니다.
         EnhanceStage stage = enhanceStoneController.getEnhanceStage(currentItem);
         if (stage != null && !stage.getNextStages().isEmpty()) {
             double totalProbability = stage.getNextStages().values().stream().mapToDouble(Double::doubleValue).sum();

@@ -71,7 +71,7 @@ public class LoginController {
         Scene scene = new Scene(vbox, 500, 300);
 
         // CSS 파일 추가
-        String cssPath = "/style.css";
+        String cssPath = "/css/login.css";
         URL cssUrl = getClass().getResource(cssPath);
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());

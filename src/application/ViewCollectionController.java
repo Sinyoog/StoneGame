@@ -148,7 +148,6 @@ public class ViewCollectionController {
                     ImageView imageView = itemImages[col][row];
                     if (imageView != null) {
                         imageView.setImage(image);
-                        System.out.println("이미지 업데이트 완료: " + itemName + " 위치: col=" + col + ", row=" + row);
                     } else {
                         System.out.println("해당 위치의 이미지 뷰가 존재하지 않습니다: col=" + col + ", row=" + row);
                     }
