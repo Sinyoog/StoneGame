@@ -44,7 +44,7 @@ public class SellController {
         stonePriceMap.put("프테라노돈", 40000000);
         stonePriceMap.put("운석", 500000000);
         stonePriceMap.put("파이어 오팔", 5000000);
-        stonePriceMap.put("레드 배릴", 13500000);
+        stonePriceMap.put("레드 베릴", 13500000);
         stonePriceMap.put("블랙 다이아몬드", 20000000);
         stonePriceMap.put("핑크 다이아몬드", 40000000);
         stonePriceMap.put("레드 다이아몬드", 200000000);

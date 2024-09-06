@@ -43,7 +43,7 @@ public class ShopController {
         // 아이템 버튼 생성
         Button basicPickaxeButton = createPurchaseButton("[단축키:1 ] 기본 곡괭이 [15만원]", 150000, "8-오팔.jpg", fundsLabel);
         Button goodPickaxeButton = createPurchaseButton("[단축키:2 ] 좋은 곡괭이 [100만원]", 1000000, "11-루비.jpg", fundsLabel);
-        Button greatPickaxeButton = createPurchaseButton("[단축키:3 ] 대단한 곡괭이 [2천만원]", 20000000, "13-다이아.jpg", fundsLabel);
+        Button greatPickaxeButton = createPurchaseButton("[단축키:3 ] 대단한 곡괭이 [2천만원]", 20000000, "13-다이아몬드.jpg", fundsLabel);
         Button fossilPickaxeButton = createPurchaseButton("[단축키:4 ] 화석 곡괭이 [500만원]", 5000000, "23-화석.jpg", fundsLabel);
 
         vbox.getChildren().addAll(basicPickaxeButton, goodPickaxeButton, greatPickaxeButton, fossilPickaxeButton);
