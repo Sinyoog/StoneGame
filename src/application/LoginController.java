@@ -1,4 +1,4 @@
-package Application;
+package application;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -8,7 +8,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.net.URL;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,16 +16,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class LoginController {
-	private static final String DB_URL = "jdbc:sqlite:datastore/test.db";
+    private static final String DB_URL = "jdbc:sqlite:test.db"; // SQLite 데이터베이스 URL
     private Stage primaryStage;
 
     public LoginController(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
 
- // LoginController.java
     public void showLoginScreen() {
-        primaryStage.setTitle("돌 강화 게임");
+        primaryStage.setTitle("Stone Enhancement Game");
 
         // ID와 비밀번호 입력 필드
         TextField idField = new TextField();
@@ -58,33 +56,21 @@ public class LoginController {
 
         // 회원가입 버튼
         Button registerButton = new Button("회원가입");
-        registerButton.setOnAction(e -> showRegisterScreen());
-
-        // 엔터 키로 로그인 버튼 클릭 이벤트 발생
-        idField.setOnAction(e -> loginButton.fire());
-        passwordField.setOnAction(e -> loginButton.fire());
+        registerButton.setOnAction(e -> {
+            showRegisterScreen();
+        });
 
         VBox vbox = new VBox(10);
         vbox.setAlignment(Pos.CENTER);
         vbox.getChildren().addAll(new Label("돌 강화 게임"), idField, passwordField, loginButton, registerButton);
-
-        Scene scene = new Scene(vbox, 500, 300);
-
-        // CSS 파일 추가
-        String cssPath = "/css/login.css";
-        URL cssUrl = getClass().getResource(cssPath);
-        if (cssUrl != null) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
-        } else {
-            System.err.println("CSS file not found: " + cssPath);
-        }
-
+        
+        Scene scene = new Scene(vbox, 300, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     private void showRegisterScreen() {
-        primaryStage.setTitle("회원가입");
+        primaryStage.setTitle("Register");
 
         // ID와 비밀번호 입력 필드
         TextField idField = new TextField();
@@ -94,7 +80,7 @@ public class LoginController {
         passwordField.setPromptText("Enter Password");
 
         // 회원가입 버튼
-        Button registerButton = new Button("회원가입");
+        Button registerButton = new Button("Register");
         registerButton.setOnAction(e -> {
             String playerId = idField.getText();
             String playerPassword = passwordField.getText();
@@ -116,20 +102,15 @@ public class LoginController {
 
         VBox vbox = new VBox(10);
         vbox.setAlignment(Pos.CENTER);
-        vbox.getChildren().addAll(new Label("회원가입"), idField, passwordField, registerButton);
+        vbox.getChildren().addAll(new Label("Register"), idField, passwordField, registerButton);
 
         Scene scene = new Scene(vbox, 300, 200);
-
-        // CSS 파일 추가
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     private void showGameScreen(String playerId) {
-        String[] emptyInventory = new String[0]; // 빈 배열 생성
-        GameController gameController = new GameController(primaryStage, playerId, 0, emptyInventory);
+        GameController gameController = new GameController(primaryStage, playerId);
         gameController.showGameScreen();
     }
 

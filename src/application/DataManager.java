@@ -1,4 +1,4 @@
-package Application;
+package application;
 
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
